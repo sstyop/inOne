@@ -1,6 +1,9 @@
+* {
+
+  font-family:monospace;
+}
 input {
   -webkit-appearance: none;
-  font-family:monospace;
   border:1px solid lightcoral;
   margin-bottom: 24px;
   padding:8px 24px;
@@ -13,7 +16,6 @@ button {
   background-color: transparent;
   border-radius: 10px;
   background-color: lightcoral;
-  font-family:monospace;
   padding:16px 32px;
   text-transform: uppercase;
   cursor: pointer;
@@ -48,11 +50,14 @@ button {
       border-radius: 5px;
       border:1px solid lightcoral;
       padding:8px 16px;
-      font-family:monospace;
       display: flex;
       flex-direction: column;
       align-items: center;
       margin:0 16px; 
+
+      &.right {
+        border-color: lightgreen;
+      }
     }
   }
 }

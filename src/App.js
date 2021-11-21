@@ -1,51 +1,37 @@
-import { useRef, useState,useCallback } from "react";
+import { useRef, useState,useCallback,useMemo } from "react";
 import { Input, Button } from "./components";
+import { useDispatch, useSelector } from 'react-redux';
+import {fetchWeather} from '../src/store/actions';
 
-const App = () => {
+const App = (props) => {
 	const [activeCityIndex, setActiveCityIndex] = useState(0);
-	const [trueAnswers, setTrueAnswers] = useState(0);
-	const [answers, setAnswers] = useState({});
-
 	const inputRef = useRef();
 
-	let cities = ["yerevan", "moscow", "london", "paris", "madrid"];
+	let cities = useMemo(() => {
+    return ["yerevan", "moscow", "london", "paris", "madrid"];
+  },[])
 
-	const onSubmit = (number) => {
+  const dispatch = useDispatch()
+  const state = useSelector(state => state)
+
+	const onSubmit = useCallback((number) => {
 		if (activeCityIndex <= cities.length - 1) {
-			fetch(
-				`https://api.openweathermap.org/data/2.5/weather?q=${cities[activeCityIndex]}&units=metric&appid=9cff733aee57cb05b63dd4f731c46bc4`
-			)
-				.then((response) => response.json())
-				.then((data) => {
-					if (number - data.main.temp < 5) {
-						setTrueAnswers(trueAnswers + 1);
-					}
-
-					let currObj = {
-						[activeCityIndex]: {
-							real: data.main.temp,
-							userSuggested: number,
-						},
-					};
-
-					let obj = Object.assign(answers, currObj);
-
-					setAnswers(obj);
-				});
+      dispatch(fetchWeather(cities[activeCityIndex],number))
 
 			setActiveCityIndex(activeCityIndex + 1);
+      inputRef.current.value = '';
 		}
-	};
+	},[activeCityIndex, cities, dispatch]);
   
   const storeAnswers = useCallback(() => {
-    return Object.keys(answers).map((i, k) => {
-      return <div className='single-answer' key={k}>
-        <p>{answers[i].userSuggested}</p>
-        <p>Was {answers[i].real}</p>
+    return state.weather.list.map((i, k) => {
+      return <div className={`single-answer ${i.userNum - i.real < 5 ? 'right': ''}`} key={k}>
+        <p>{i.userNum}</p>
+        <p>Was {i.real}</p>
       </div>
     });
-  },[answers])
-
+  },[state])
+  
 	return (
 		<div className='App'>
 			<div className='block'>
@@ -58,11 +44,12 @@ const App = () => {
 					onClick={() => onSubmit(inputRef.current.valueAsNumber)}
 				/>
 			</div>
-			<div className='last-answers'>
+			{state.weather && <div className='last-answers'>
         {storeAnswers()}
       </div>
+      }
 		</div>
 	);
 };
 
-export default App;
+export default App
